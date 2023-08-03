@@ -1,5 +1,5 @@
 package org.rsultan.video.source;
 
-public enum SourceType {
+public enum InputType {
   DIRECT, STREAM
 }

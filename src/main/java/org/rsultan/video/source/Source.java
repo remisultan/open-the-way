@@ -17,7 +17,7 @@ public interface Source {
   FrameGrabber getFrameGrabber();
 
 
-  static Source get(SourceType sourceType, Map<String, ?> properties) {
+  static Source get(InputType sourceType, Map<String, ?> properties) {
     return switch (sourceType) {
       case DIRECT -> new DeviceSource(properties);
       case STREAM -> new StreamSource(properties);

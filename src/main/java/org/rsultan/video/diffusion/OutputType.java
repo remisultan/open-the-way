@@ -1,6 +1,6 @@
 package org.rsultan.video.diffusion;
 
 
-public enum DiffusionType {
+public enum OutputType {
   DIRECT, STREAM
 }

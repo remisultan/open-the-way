@@ -8,12 +8,10 @@ public interface Constants {
   int DEFAULT_GOP_LENGTH_IN_FRAMES = 60;
   String IMAGE = "dog.jpg";
 
-
-  String DIFFUSION_ADDRESS = "diffusion_address";
-  String SOURCE_ADDRESS = "source_address";
+  String ADDRESS = "address";
   String WIDTH = "width";
   String HEIGHT = "height";
-  String SOURCE = "source";
+  String INPUT_TYPE = "source";
 
   String BITRATE = "bitrate";
   String TUNE = "tune";

@@ -7,7 +7,7 @@ import static org.rsultan.video.Constants.FORMAT;
 import static org.rsultan.video.Constants.FRAME_RATE;
 import static org.rsultan.video.Constants.HEIGHT;
 import static org.rsultan.video.Constants.PRESET;
-import static org.rsultan.video.Constants.SOURCE_ADDRESS;
+import static org.rsultan.video.Constants.ADDRESS;
 import static org.rsultan.video.Constants.TUNE;
 import static org.rsultan.video.Constants.WIDTH;
 
@@ -20,7 +20,7 @@ public class StreamSource extends AbstractSource {
 
   public StreamSource(Map<String,?> properties) {
     super(
-        new FFmpegFrameGrabber((String) properties.get(SOURCE_ADDRESS)),
+        new FFmpegFrameGrabber((String) properties.get(ADDRESS)),
         (int) properties.get(WIDTH),
         (int) properties.get(HEIGHT)
     );
