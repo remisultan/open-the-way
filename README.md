@@ -2,8 +2,8 @@
 This is a repository to play with OpenCV and yolo object detection model
 
 Inspired by: 
-  - [YOLONet example][https://github.com/bytedeco/javacv/blob/master/samples/YOLONet.java]
-  - [Webcam Capture][https://github.com/bytedeco/javacv/blob/master/samples/WebcamAndMicrophoneCapture.java]
+  - [YOLONet example](https://github.com/bytedeco/javacv/blob/master/samples/YOLONet.java)
+  - [Webcam Capture](https://github.com/bytedeco/javacv/blob/master/samples/WebcamAndMicrophoneCapture.java)
 
 ## Requirements
 
