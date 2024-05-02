@@ -32,6 +32,8 @@ import static org.bytedeco.opencv.helper.opencv_core.RGB;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -54,24 +56,21 @@ class ResultExtractor {
   private final List<String> names;
   private final Map<String, Scalar> colors;
 
-  public ResultExtractor(float confidenceThreshold, float nmsThreshold, String namesPath) {
+  public ResultExtractor(float confidenceThreshold, float nmsThreshold, List<String> names) {
     this.confidenceThreshold = confidenceThreshold;
     this.nmsThreshold = nmsThreshold;
-    this.names = getNames(namesPath);
+    this.names = names;
     this.colors = getColors(this.names);
   }
 
   private static Map<String, Scalar> getColors(List<String> names) {
-    return names.stream()
-        .map(name -> Map.entry(name,
-            RGB(doubleRand() * 255, doubleRand() * 255, doubleRand() * 255)))
-        .collect(toMap(Entry::getKey, Entry::getValue));
-  }
-
-  private static List<String> getNames(String namesPath) {
     try {
-      return Files.readAllLines(Paths.get(namesPath));
-    } catch (IOException e) {
+      SecureRandom secureRandom = SecureRandom.getInstanceStrong();
+      return names.stream()
+          .map(name -> Map.entry(name,
+              RGB(secureRandom.nextDouble() * 255, secureRandom.nextDouble() * 255, secureRandom.nextDouble() * 255)))
+          .collect(toMap(Entry::getKey, Entry::getValue));
+    } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
   }
@@ -106,7 +105,8 @@ class ResultExtractor {
     return detections;
   }
 
-  private static void releaseReferences(IntVector classIds, FloatVector confidences, RectVector boxes,
+  private static void releaseReferences(IntVector classIds, FloatVector confidences,
+      RectVector boxes,
       IntPointer indices, FloatPointer confidencesPointer) {
     indices.releaseReference();
     confidencesPointer.releaseReference();
@@ -151,7 +151,9 @@ class ResultExtractor {
     return new MinmaxLocResult(maxIndex, maxScore);
   }
 
-  private record MinmaxLocResult(int maxIndex, float maxScore) {}
+  private record MinmaxLocResult(int maxIndex, float maxScore) {
+
+  }
 
   private static void pushDetectedObject(
       Mat frame,

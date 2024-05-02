@@ -13,8 +13,8 @@
     <maven.compiler.target>20</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <deeplearning4j-core.version>1.0.0-M2.1</deeplearning4j-core.version>
-    <javacv-version>1.5.9</javacv-version>
-    <opencv-version>4.7.0</opencv-version>
+    <javacv-version>1.5.10</javacv-version>
+    <opencv-version>4.9.0</opencv-version>
     <picocli.version>4.7.4</picocli.version>
   </properties>
 
@@ -27,7 +27,7 @@
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>ffmpeg-platform-gpl</artifactId>
-      <version>6.0-${javacv-version}</version>
+      <version>6.1.1-${javacv-version}</version>
     </dependency>
     <dependency>
       <groupId>org.bytedeco</groupId>
@@ -37,7 +37,7 @@
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>cuda-platform-redist</artifactId>
-      <version>12.1-8.9-${javacv-version}</version>
+      <version>12.3-8.9-${javacv-version}</version>
     </dependency>
     <dependency>
       <groupId>org.bytedeco</groupId>

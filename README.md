@@ -81,7 +81,8 @@ Usage: <main class> [--cuda-enabled] [--yolo-enabled]
                     [--in-frame-rate=<inputFrameRate>]
                     [--in-height=<inputHeight>] [--in-preset=<inputPreset>]
                     [--in-tune=<inputTune>] [--in-type=<inputType>]
-                    [--in-width=<inputWidth>] [--nms-threshold=<nmsThreshold>]
+                    [--in-width=<inputWidth>] [--model-format=<modelFormat>]
+                    [--nms-threshold=<nmsThreshold>]
                     [--out-address=<outputAddress>]
                     [--out-bitrate=<outputBitrate>] [--out-codec=<outputCodec>]
                     [--out-crf=<outputCrf>] [--out-format=<outputFormat>]
@@ -89,7 +90,7 @@ Usage: <main class> [--cuda-enabled] [--yolo-enabled]
                     [--out-height=<outputHeight>] [--out-preset=<outputPreset>]
                     [--out-tune=<outputTune>] [--out-type=<outputType>]
                     [--out-width=<outputWidth>] [--yolo-height=<yoloHeight>]
-                    [--yolo-path=<yoloPath>] [--yolo-width=<yoloWidth>]
+                    [--yolo-path=<modelPath>] [--yolo-width=<yoloWidth>]
       --confidence-threshold=<confidenceThreshold>
                             the confidence detection threshold
                             default: 0.4
@@ -131,6 +132,10 @@ Usage: <main class> [--cuda-enabled] [--yolo-enabled]
       --in-width=<inputWidth>
                             The input width of the stream
                               Default: 1280
+      --model-format=<modelFormat>
+                            enables yolo detection on the stream
+                            default: DARKNET
+                              Default: DARKNET
       --nms-threshold=<nmsThreshold>
                             the NMS (Non-maximum Suppression) threshold
                             more info: https://arxiv.org/abs/1705.02950
@@ -174,15 +179,13 @@ Usage: <main class> [--cuda-enabled] [--yolo-enabled]
       --yolo-height=<yoloHeight>
                             the yolo image blob height used for detection
                               Default: 608
-      --yolo-path=<yoloPath>
+      --yolo-path=<modelPath>
                             path to the yolo files
                             the files within that folder must be named: config.
                               cfg, names.txt, weights.weights
                             eg: /path/to/yolov7 is the path that will contain:
                               /path/to/yolov7/config.cfg, /path/to/yolov7/names.
                               txt, /path/to/yolov7/weights.weights
-                              Default: C:
-                              \Users\33646\dev\open-the-way\model\yolov7
       --yolo-width=<yoloWidth>
                             the yolo image blob width used for detection
 ```

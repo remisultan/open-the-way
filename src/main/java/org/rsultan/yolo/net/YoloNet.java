@@ -29,10 +29,10 @@ import org.bytedeco.opencv.opencv_core.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.rsultan.video.Constants;
+import org.rsultan.yolo.net.config.NetConfig;
 import org.rsultan.yolo.result.DetectionResult;
 
 import static org.bytedeco.opencv.global.opencv_core.CV_32F;
@@ -42,46 +42,46 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 
 public class YoloNet {
 
-  private final Path configPath;
-  private final Path weightsPath;
   private final int width;
   private final int height;
   private final boolean cudaEnabled;
+  private final NetConfig netConfig;
   private Net net;
   private StringVector outNames;
   private final ResultExtractor resultExtractor;
 
-  public YoloNet(String configPath, String weightsPath, String namesPath,
+  public YoloNet(NetConfig netConfig,
       int width, int height,
       float confidenceThreshold, float nmsThreshold, boolean cudaEnabled) {
-    this.configPath = Paths.get(configPath);
-    this.weightsPath = Paths.get(weightsPath);
+    this.netConfig = netConfig;
     this.width = width;
     this.height = height;
     this.cudaEnabled = cudaEnabled;
-    resultExtractor = new ResultExtractor(confidenceThreshold, nmsThreshold, namesPath);
+    resultExtractor = new ResultExtractor(confidenceThreshold, nmsThreshold, netConfig.getNames());
 
   }
 
-  public boolean initialize() {
-    net = readNetFromDarknet(
-        configPath.toAbsolutePath().toString(),
-        weightsPath.toAbsolutePath().toString());
+  public YoloNet initialize() {
+    net = netConfig.buildNet();
 
     outNames = net.getUnconnectedOutLayersNames();
 
     if (cudaEnabled && getCudaEnabledDeviceCount() > 0) {
       net.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
       net.setPreferableTarget(opencv_dnn.DNN_TARGET_CUDA);
+    } else {
+      net.setPreferableBackend(DNN_BACKEND_OPENCV);
+      net.setPreferableTarget(DNN_TARGET_CPU);
     }
 
     boolean netIsNotEmpty = !net.empty();
     if (netIsNotEmpty) {
       // We arbitrarily initialize the first image since the first forward takes time
-      Path tmpFile = null;
+      Path tmpFile;
       try {
         tmpFile = Files.createTempFile(null, "jpg");
-        Files.write(tmpFile, getClass().getClassLoader().getResourceAsStream(Constants.IMAGE).readAllBytes());
+        Files.write(tmpFile,
+            getClass().getClassLoader().getResourceAsStream(Constants.IMAGE).readAllBytes());
         var image = imread(tmpFile.toString());
         netForward(getBlobFromImage(image)).releaseReference();
         image.release();
@@ -90,7 +90,7 @@ public class YoloNet {
         throw new RuntimeException(e);
       }
     }
-    return netIsNotEmpty;
+    return this;
   }
 
   private MatVector netForward(Mat frame) {

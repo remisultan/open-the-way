@@ -35,6 +35,8 @@ import org.rsultan.video.diffusion.OutputType;
 import org.rsultan.video.source.Source;
 import org.rsultan.video.source.InputType;
 import org.rsultan.yolo.net.YoloNet;
+import org.rsultan.yolo.net.config.ModelFormat;
+import org.rsultan.yolo.net.config.NetConfig;
 import org.rsultan.yolo.result.DetectionResult;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
@@ -50,9 +52,11 @@ public class LiveDetectorCapture implements Runnable {
   /***             YOLO Config           ***/
   /***                                   ***/
   /*****************************************/
+  @Option(names = {"--model-format"}, showDefaultValue = ALWAYS, description = {
+      "enables yolo detection on the stream", "default: DARKNET"})
+  private ModelFormat modelFormat = ModelFormat.DARKNET;
   @Option(names = {"--yolo-enabled"}, showDefaultValue = ALWAYS, description = {
-      "enables yolo detection on the stream",
-      "default: false"})
+      "enables yolo detection on the stream", "default: false"})
   private boolean yoloEnabled = false;
 
   @Option(names = {"--cuda-enabled"}, showDefaultValue = ALWAYS, description = {
@@ -62,9 +66,8 @@ public class LiveDetectorCapture implements Runnable {
   @Option(names = {"--yolo-path"}, showDefaultValue = ALWAYS, description = {
       "path to the yolo files",
       "the files within that folder must be named: config.cfg, names.txt, weights.weights",
-      "eg: /path/to/yolov7 is the path that will contain: /path/to/yolov7/config.cfg, /path/to/yolov7/names.txt, /path/to/yolov7/weights.weights",
-  })
-  private String yoloPath =
+      "eg: /path/to/yolov7 is the path that will contain: /path/to/yolov7/config.cfg, /path/to/yolov7/names.txt, /path/to/yolov7/weights.weights",})
+  private String modelPath =
       System.getProperty("user.dir") + File.separator + "model" + File.separator + "yolov7";
 
   @Option(names = {"--confidence-threshold"}, description = {"the confidence detection threshold",
@@ -72,8 +75,7 @@ public class LiveDetectorCapture implements Runnable {
   private float confidenceThreshold = 0.4f;
 
   @Option(names = {"--nms-threshold"}, showDefaultValue = ALWAYS, description = {
-      "the NMS (Non-maximum Suppression) threshold",
-      "more info: https://arxiv.org/abs/1705.02950"})
+      "the NMS (Non-maximum Suppression) threshold", "more info: https://arxiv.org/abs/1705.02950"})
   private float nmsThreshold = 0.4f;
 
   @Option(names = {"--yolo-width"}, description = {"the yolo image blob width used for detection"})
@@ -91,58 +93,47 @@ public class LiveDetectorCapture implements Runnable {
 
   @Option(names = {"--in-address"}, showDefaultValue = ALWAYS, description = {
       "The input address to use when fetching from a URL",
-      "The URL depends on the forman (flv, mjpeg, ...) and is optional if using --in-type=direct",
-  })
+      "The URL depends on the forman (flv, mjpeg, ...) and is optional if using --in-type=direct",})
   private String inputAddress = "rtmp://localhost:1935/stream/hello";
 
   @Option(names = {"--in-type"}, showDefaultValue = ALWAYS, description = {
-      "The input type of the stream"
-  })
+      "The input type of the stream"})
   private InputType inputType = InputType.DIRECT;
 
   @Option(names = {"--in-width"}, showDefaultValue = ALWAYS, description = {
-      "The input width of the stream"
-  })
+      "The input width of the stream"})
   private int inputWidth = 1280;
 
   @Option(names = {"--in-height"}, showDefaultValue = ALWAYS, description = {
-      "The input height of the stream"
-  })
+      "The input height of the stream"})
   private int inputHeight = 720;
 
   @Option(names = {"--in-bitrate"}, showDefaultValue = ALWAYS, description = {
-      "The input bitrate of the stream"
-  })
+      "The input bitrate of the stream"})
   private int inputBitrate = 2000000;
 
   @Option(names = {"--in-tune"}, showDefaultValue = ALWAYS, description = {
-      "The input tune of the stream"
-  })
+      "The input tune of the stream"})
   private String inputTune = "zerolatency";
 
   @Option(names = {"--in-preset"}, showDefaultValue = ALWAYS, description = {
-      "The input preset of the stream"
-  })
+      "The input preset of the stream"})
   private String inputPreset = "ultrafast";
 
   @Option(names = {"--in-crf"}, showDefaultValue = ALWAYS, description = {
-      "The input crf of the stream"
-  })
+      "The input crf of the stream"})
   private String inputCrf = "28";
 
   @Option(names = {"--in-codec"}, description = {
-      "The input codec of the stream (default: AV_CODEC_ID_H264)"
-  })
+      "The input codec of the stream (default: AV_CODEC_ID_H264)"})
   private int inputCodec = avcodec.AV_CODEC_ID_H264;
 
   @Option(names = {"--in-format"}, showDefaultValue = ALWAYS, description = {
-      "The input format of the stream"
-  })
+      "The input format of the stream"})
   private String inputFormat = "flv";
 
   @Option(names = {"--in-frame-rate"}, showDefaultValue = ALWAYS, description = {
-      "The input frame rate of the stream"
-  })
+      "The input frame rate of the stream"})
   private int inputFrameRate = DEFAULT_FRAME_RATE;
 
   /*****************************************/
@@ -153,62 +144,49 @@ public class LiveDetectorCapture implements Runnable {
 
   @Option(names = {"--out-address"}, showDefaultValue = ALWAYS, description = {
       "The output address to use when streaming on a URL",
-      "The URL depends on the format (flv, mjpeg, ...) and is optional if using --out-type=direct",
-  })
+      "The URL depends on the format (flv, mjpeg, ...) and is optional if using --out-type=direct",})
   private String outputAddress = "rtmp://localhost:1935/stream/hello";
 
   @Option(names = {"--out-type"}, showDefaultValue = ALWAYS, description = {
-      "The output type of the stream"
-  })
+      "The output type of the stream"})
   private OutputType outputType = OutputType.DIRECT;
 
   @Option(names = {"--out-width"}, showDefaultValue = ALWAYS, description = {
-      "The output width of the stream"
-  })
+      "The output width of the stream"})
   private int outputWidth = 1280;
 
   @Option(names = {"--out-height"}, showDefaultValue = ALWAYS, description = {
-      "The output height of the stream"
-  })
+      "The output height of the stream"})
   private int outputHeight = 720;
 
   @Option(names = {"--out-bitrate"}, showDefaultValue = ALWAYS, description = {
-      "The output bitrate of the stream"
-  })
+      "The output bitrate of the stream"})
   private int outputBitrate = 2000000;
 
   @Option(names = {"--out-tune"}, showDefaultValue = ALWAYS, description = {
-      "The output tune of the stream"
-  })
+      "The output tune of the stream"})
   private String outputTune = "zerolatency";
 
   @Option(names = {"--out-preset"}, showDefaultValue = ALWAYS, description = {
-      "The output preset of the stream"
-  })
+      "The output preset of the stream"})
   private String outputPreset = "ultrafast";
 
   @Option(names = {"--out-crf"}, showDefaultValue = ALWAYS, description = {
-      "The output crf of the stream"
-  })
+      "The output crf of the stream"})
   private String outputCrf = "28";
 
-  @Option(names = {"--out-codec"}, description = {
-      "The output codec of the stream (default)"
-  })
+  @Option(names = {"--out-codec"}, description = {"The output codec of the stream (default)"})
   private int outputCodec = avcodec.AV_CODEC_ID_H264;
 
   @Option(names = {"--out-format"}, showDefaultValue = ALWAYS, description = {
-      "The output format of the stream"
-  })
+      "The output format of the stream"})
   private String outputFormat = "flv";
 
   @Option(names = {"--out-frame-rate"}, showDefaultValue = ALWAYS, description = {
-      "The output framerate of the stream"
-  })
+      "The output framerate of the stream"})
   private int outputFrameRate = DEFAULT_FRAME_RATE;
   @Option(names = {"--gop"}, showDefaultValue = ALWAYS, description = {
-      "The output GOP (Group Of Pictures) size of the stream"
-  })
+      "The output GOP (Group Of Pictures) size of the stream"})
   private int gop = DEFAULT_GOP_LENGTH_IN_FRAMES;
 
   public static final VideoEndedException THE_CAPTURE_HAD_ENDED = new VideoEndedException(
@@ -224,40 +202,24 @@ public class LiveDetectorCapture implements Runnable {
 
   @Override
   public void run() {
-    final YoloNet yoloNet = buildYolo();
-    var input = Source.get(inputType, Map.ofEntries(
-        Map.entry(WIDTH, inputWidth),
-        Map.entry(HEIGHT, inputHeight),
-        Map.entry(ADDRESS, inputAddress),
-        Map.entry(DEVICE_NUMBER, DEFAULT_DEVICE_NUMBER),
-        Map.entry(BITRATE, inputBitrate),
-        Map.entry(TUNE, inputTune),
-        Map.entry(PRESET, inputPreset),
-        Map.entry(CRF, inputCrf),
-        Map.entry(CODEC, inputCodec),
-        Map.entry(FORMAT, inputFormat),
-        Map.entry(FRAME_RATE, inputFrameRate)
-    ));
-    var diffusion = Diffusion.get(outputType, Map.ofEntries(
-        Map.entry(INPUT_TYPE, input),
-        Map.entry(ADDRESS, outputAddress),
-        Map.entry(WIDTH, outputWidth),
-        Map.entry(HEIGHT, outputHeight),
-        Map.entry(BITRATE, outputBitrate),
-        Map.entry(TUNE, outputTune),
-        Map.entry(PRESET, outputPreset),
-        Map.entry(CRF, outputCrf),
-        Map.entry(CODEC, outputCodec),
-        Map.entry(FORMAT, outputFormat),
-        Map.entry(GOP, gop),
-        Map.entry(FRAME_RATE, outputFrameRate)
-    ));
+    final YoloNet yoloNet = buildDNN();
+    var input = Source.get(inputType,
+        Map.ofEntries(Map.entry(WIDTH, inputWidth), Map.entry(HEIGHT, inputHeight),
+            Map.entry(ADDRESS, inputAddress), Map.entry(DEVICE_NUMBER, DEFAULT_DEVICE_NUMBER),
+            Map.entry(BITRATE, inputBitrate), Map.entry(TUNE, inputTune),
+            Map.entry(PRESET, inputPreset), Map.entry(CRF, inputCrf), Map.entry(CODEC, inputCodec),
+            Map.entry(FORMAT, inputFormat), Map.entry(FRAME_RATE, inputFrameRate)));
+    var diffusion = Diffusion.get(outputType,
+        Map.ofEntries(Map.entry(INPUT_TYPE, input), Map.entry(ADDRESS, outputAddress),
+            Map.entry(WIDTH, outputWidth), Map.entry(HEIGHT, outputHeight),
+            Map.entry(BITRATE, outputBitrate), Map.entry(TUNE, outputTune),
+            Map.entry(PRESET, outputPreset), Map.entry(CRF, outputCrf),
+            Map.entry(CODEC, outputCodec), Map.entry(FORMAT, outputFormat), Map.entry(GOP, gop),
+            Map.entry(FRAME_RATE, outputFrameRate)));
 
     try {
-      Stream.generate(input::capture)
-          .map(opt -> opt.orElseThrow(() -> THE_CAPTURE_HAD_ENDED))
-          .map(matFrame -> predict(yoloNet, matFrame))
-          .forEachOrdered(diffusion::show);
+      Stream.generate(input::capture).map(opt -> opt.orElseThrow(() -> THE_CAPTURE_HAD_ENDED))
+          .map(matFrame -> predict(yoloNet, matFrame)).forEachOrdered(diffusion::show);
     } catch (VideoEndedException vee) {
       //Do Nothing
     } catch (Throwable e) {
@@ -273,12 +235,10 @@ public class LiveDetectorCapture implements Runnable {
     }
 
     var matFrame = converterToMat.convert(frame);
-    if (index.incrementAndGet() % 4 != 0) {
-      executorService.submit(() -> {
-        predictions = yolo.predict(matFrame);
-        index.set(0);
-      });
-    }
+    executorService.submit(() -> {
+      predictions = yolo.predict(matFrame);
+      index.set(0);
+    });
     if (predictions != null) {
       DetectionUtils.draw(predictions, matFrame);
     }
@@ -298,16 +258,12 @@ public class LiveDetectorCapture implements Runnable {
     }
   }
 
-  private YoloNet buildYolo() {
+  private YoloNet buildDNN() {
     YoloNet yolo = null;
     if (yoloEnabled) {
-      yolo = new YoloNet(
-          yoloPath + File.separator + "config.cfg",
-          yoloPath + File.separator + "weights.weights",
-          yoloPath + File.separator + "names.txt",
-          yoloWidth, yoloHeight, confidenceThreshold, nmsThreshold, cudaEnabled);
-
-      yolo.initialize();
+      NetConfig netConfig = modelFormat.toConfig(modelPath);
+      yolo = new YoloNet(netConfig, yoloWidth, yoloHeight, confidenceThreshold,
+          nmsThreshold, cudaEnabled).initialize();
     }
     return yolo;
   }
